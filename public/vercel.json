@@ -3,21 +3,21 @@
   "builds": [
     {
       "src": "api/*.js",
-      "use": "@vercel/node"  // Menentukan backend berbasis Node.js
+      "use": "@vercel/node"  
     },
     {
       "src": "index.html",
-      "use": "@vercel/static" // Menentukan file statis (frontend)
+      "use": "@vercel/static" 
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1" // Route untuk backend API
+      "dest": "/api/$1" 
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html" // Route untuk frontend
+      "dest": "/index.html" 
     }
   ]
 }
