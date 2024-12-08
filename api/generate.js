@@ -1,5 +1,5 @@
-// Menyimpan data script sementara di memory (object JavaScript)
-let scriptDatabase = {};  // Menyimpan script berdasarkan uniqueId
+const fs = require('fs');
+const path = require('path');
 
 module.exports = async (req, res) => {
   if (req.method === 'POST') {
@@ -11,8 +11,17 @@ module.exports = async (req, res) => {
     // Generate uniqueId berdasarkan waktu atau random string
     const uniqueId = Math.random().toString(36).substring(2, 15);
 
-    // Simpan script ke memory
-    scriptDatabase[uniqueId] = luaScript;
+    // Tentukan direktori untuk menyimpan file sementara
+    const dir = path.join(__dirname, '..', 'data');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+
+    // Tentukan path file Lua berdasarkan uniqueId
+    const filePath = path.join(dir, `${uniqueId}.lua`);
+
+    // Simpan Lua script ke file
+    fs.writeFileSync(filePath, luaScript);
 
     // Generate link untuk mengakses script tersebut
     const scriptLink = `https://my-lua-generator.vercel.app/api/raw/${uniqueId}`;
