@@ -9,27 +9,28 @@ export default async function handler(req, res) {
             return res.status(400).json({ message: 'Username and webhook are required' });
         }
 
-        const uniqueId = crypto.randomBytes(8).toString('hex'); // Generate unique ID
+        // Generate ID unik dan Lua script
+        const uniqueId = crypto.randomBytes(8).toString('hex');
         const luaScript = `
 local username = "${username}"
 local webhook = "${webhook}"
 
-print("Generated Lua Script")
+print("Generated Lua Script for ${username}")
 -- Tambahkan logika lain di sini
 `;
 
-        // Simpan sementara di memori global (serverless state)
+        // Simpan sementara di memori global (state serverless)
         global.generatedScripts = global.generatedScripts || {};
         global.generatedScripts[uniqueId] = luaScript;
 
-        // Kirim tautan kembali ke pengguna
+        // Kirim tautan ke pengguna
         const scriptUrl = `https://${req.headers.host}/api/raw/${uniqueId}`;
         return res.status(200).json({ link: scriptUrl });
     } else if (req.method === 'GET') {
-        // Tangani endpoint untuk mengakses script
         const { id } = req.query;
-        const luaScript = global.generatedScripts?.[id];
 
+        // Cek apakah ID script tersedia
+        const luaScript = global.generatedScripts?.[id];
         if (!luaScript) {
             return res.status(404).send('Script not found');
         }
@@ -40,4 +41,3 @@ print("Generated Lua Script")
         return res.status(405).json({ message: 'Method not allowed' });
     }
 }
-
