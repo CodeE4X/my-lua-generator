@@ -1,1 +1,13 @@
 
+{
+  "name": "lua-generator",
+  "version": "1.0.0",
+  "description": "Generate Lua scripts with username and webhook",
+  "main": "index.html",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1"
+  }
+}
