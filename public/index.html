@@ -1,1 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lua Script Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input {
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Your Lua Script</h1>
+    <form id="luaForm">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br>
+        <label for="webhook">Webhook:</label><br>
+        <input type="text" id="webhook" name="webhook" required><br>
+        <button type="submit">Generate</button>
+    </form>
+    <div class="result" id="result"></div>
+
+    <script>
+        const form = document.getElementById('luaForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const webhook = document.getElementById('webhook').value;
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, webhook }),
+            });
+
+            const data = await response.json();
+            const resultDiv = document.getElementById('result');
+            if (response.ok) {
+                resultDiv.innerHTML = `Your Lua script link: <a href="${data.link}" target="_blank">${data.link}</a>`;
+            } else {
+                resultDiv.textContent = `Error: ${data.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
 
