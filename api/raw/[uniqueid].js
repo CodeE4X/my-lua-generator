@@ -1,10 +1,15 @@
+const fs = require('fs');
+const path = require('path');
+
 module.exports = (req, res) => {
   const { uniqueId } = req.query;  // Ambil uniqueId dari URL
 
-  // Ambil script dari memory (dari scriptDatabase)
-  const luaScript = global.scriptDatabase ? global.scriptDatabase[uniqueId] : null;
+  // Tentukan path file Lua berdasarkan uniqueId
+  const filePath = path.join(__dirname, '..', 'data', `${uniqueId}.lua`);
 
-  if (luaScript) {
+  // Cek apakah file Lua ada
+  if (fs.existsSync(filePath)) {
+    const luaScript = fs.readFileSync(filePath, 'utf-8');
     res.setHeader('Content-Type', 'text/plain');
     res.status(200).send(luaScript);  // Kirim Lua script ke client
   } else {
