@@ -1,4 +1,16 @@
+const sqlite3 = require('better-sqlite3');
 const crypto = require('crypto');
+
+// Hubungkan atau buat database
+const db = sqlite3('./data/scripts.db');
+
+// Buat tabel untuk menyimpan script jika belum ada
+db.exec(`
+    CREATE TABLE IF NOT EXISTS scripts (
+        id TEXT PRIMARY KEY,
+        lua_script TEXT
+    );
+`);
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -14,14 +26,12 @@ export default async function handler(req, res) {
         const luaScript = `
 local username = "${username}"
 local webhook = "${webhook}"
-
 print("Generated Lua Script for ${username}")
--- Tambahkan logika lain di sini
 `;
 
-        // Simpan sementara di memori global (state serverless)
-        global.generatedScripts = global.generatedScripts || {};
-        global.generatedScripts[uniqueId] = luaScript;
+        // Simpan script ke database
+        const stmt = db.prepare(`INSERT INTO scripts (id, lua_script) VALUES (?, ?)`);
+        stmt.run(uniqueId, luaScript);
 
         // Kirim tautan ke pengguna
         const scriptUrl = `https://${req.headers.host}/api/raw/${uniqueId}`;
@@ -29,14 +39,16 @@ print("Generated Lua Script for ${username}")
     } else if (req.method === 'GET') {
         const { id } = req.query;
 
-        // Cek apakah ID script tersedia
-        const luaScript = global.generatedScripts?.[id];
-        if (!luaScript) {
+        // Ambil script dari database
+        const stmt = db.prepare(`SELECT lua_script FROM scripts WHERE id = ?`);
+        const row = stmt.get(id);
+
+        if (!row) {
             return res.status(404).send('Script not found');
         }
 
         res.setHeader('Content-Type', 'text/plain');
-        return res.send(luaScript);
+        return res.send(row.lua_script);
     } else {
         return res.status(405).json({ message: 'Method not allowed' });
     }
